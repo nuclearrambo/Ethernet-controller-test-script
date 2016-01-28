@@ -104,7 +104,7 @@ class Ui_Form(QtGui.QWidget):
         print "Uploading to DDS #1"
         ddsFileName = 'nlfm_DDS_13us_5MHz.bin'
         ddsFileStats = os.stat(ddsFileName)
-        chunks = ddsFileStats.st_size/512
+        chunks = ddsFileStats.st_size/1024
         print "File will be split in", chunks
         ddsFile = open(ddsFileName, 'rb')
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -113,11 +113,11 @@ class Ui_Form(QtGui.QWidget):
             #contents = ddsFile.read()
             #ddsFile = open(ddsFileName, 'rb')
             for i in range(0, chunks+1):
-                ddsFileContent = ddsFile.read(512)
-                client_socket.send("DDS1:"+str(i)+ddsFileContent)
-                time.sleep(2)
+                ddsFileContent = ddsFile.read(1024)
+                client_socket.send("DDS1:"+str(i)+":"+str(chunks+1)+":"+ddsFileContent)
+                time.sleep(0.5)
                 reconstructed += ddsFileContent
-
+                print "Checksum: "+str(sum(bytearray(reconstructed)))
             client_socket.close()
 
         except socket.error, (value, message):
@@ -211,7 +211,7 @@ class ThreadClass(QtCore.QThread):
             
                         
                 #print 'Message[' + addr[0] + ':' + str(addr[1]) + '] - ' + data + '\n'
-                #f.write('' + data + '\n')
+                f.write('' + data + '\n')
                 
             s.close()
             f.close()
